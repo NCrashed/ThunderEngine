@@ -239,7 +239,7 @@ private:
 	int mWidth, mHeight;
 }
 
-private extern(Windows) uint readProc(void *buffer, uint size, uint count, fi_handle handle) nothrow
+private extern(System) uint readProc(void *buffer, uint size, uint count, fi_handle handle) nothrow
 {
 	try
 	{
@@ -259,7 +259,7 @@ private extern(Windows) uint readProc(void *buffer, uint size, uint count, fi_ha
 	return 0;
 }
 
-private extern(Windows) uint writeProc(void *buffer, uint size, uint count, fi_handle handle) nothrow
+private extern(System) uint writeProc(void *buffer, uint size, uint count, fi_handle handle) nothrow
 {
 	try
 	{
@@ -273,7 +273,7 @@ private extern(Windows) uint writeProc(void *buffer, uint size, uint count, fi_h
 	return 0;
 }
 
-private extern(Windows) int seekProc(fi_handle handle, int offset, int origin) nothrow
+private extern(System) int seekProc(fi_handle handle, ptrdiff_t offset, int origin) nothrow
 {
 	try
 	{
@@ -287,7 +287,7 @@ private extern(Windows) int seekProc(fi_handle handle, int offset, int origin) n
 	return 0;
 }
 
-private extern(Windows) int tellProc(fi_handle handle) nothrow
+private extern(System) ptrdiff_t tellProc(fi_handle handle) nothrow
 { 
 	try
 	{

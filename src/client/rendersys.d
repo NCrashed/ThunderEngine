@@ -69,7 +69,7 @@ class RenderSystem
         version(linux)
         {
             DerelictGL3.load();
-            DerelictGLFW3.load("./libglfw.so");
+            DerelictGLFW3.load("./libglfw3.so");
             DerelictFI.load();      
         }
 

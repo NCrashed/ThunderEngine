@@ -397,9 +397,9 @@ class Octree(size_t brickSize, size_t borderSize = 1, size_t brickPoolSide = 48)
 			}
 						
 			// generating brick
-			int stepX = region.sizex / brickSize;
-			int stepY = region.sizey / brickSize;
-			int stepZ = region.sizez / brickSize;
+			int stepX = cast(int)(region.sizex / brickSize);
+			int stepY = cast(int)(region.sizey / brickSize);
+			int stepZ = cast(int)(region.sizez / brickSize);
 			
 			if(stepX == 0) stepX = 1;
 			if(stepY == 0) stepY = 1;

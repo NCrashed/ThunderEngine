@@ -76,7 +76,7 @@ void compileGLFW3(string libPath)
 		checkProgram("cmake", "Cannot find CMake to build GLFW3! You can get it from http://www.cmake.org/cmake/resources/software.html");
 		system("cd "~libPath~` && cmake -D BUILD_SHARED_LIBS=ON ./`);
 		system("cd "~libPath~` && make`);
-		system("cp "~libPath~`/src/libglfw.so `~getCurrentTarget().outDir~`/libglfw.so`);
+		system("cp "~libPath~`/src/libglfw.so `~getCurrentTarget().outDir~`/libglfw3.so`);
 	}
 	version(Windows)
 	{
