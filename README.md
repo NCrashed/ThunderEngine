@@ -97,14 +97,14 @@ mode adds 'd' suffix to dll name, remove it.
 Milestones
 ===========
 **v0.0.1**:
-	* MDL model parser and rendering.
-	* BLP textures support.
-	* Frustum culling.
+* MDL model parser and rendering.
+* BLP textures support.
+* Frustum culling.
 
 **v0.0.2**: (public announcement on XGM)
-	* MDX model support.
-	* Skeletal animation.
-	* Creating more detail roadmap.
+* MDX model support.
+* Skeletal animation.
+* Creating more detail roadmap.
 
 Screenshots
 ===========
