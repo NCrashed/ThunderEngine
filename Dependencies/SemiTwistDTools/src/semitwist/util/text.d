@@ -895,7 +895,12 @@ struct InsensitiveT(T) if(isSomeString!T)
 		return this;
 	}
 	
-	const bool opEquals(InsensitiveT!T b)
+	const hash_t opHash()
+	{
+		return typeid(str).getHash(&str);
+	}
+
+	const bool opEquals(ref const InsensitiveT!T b)
 	{
 		/+if (str is b.str) return true;
 		if (str is null || b.str is null) return false;
@@ -903,7 +908,7 @@ struct InsensitiveT(T) if(isSomeString!T)
 		return this.opCmp(b) == 0;
 	}
 	
-	const int opCmp(InsensitiveT!T b)
+	const int opCmp(ref const InsensitiveT!T b)
 	{
 		if (str   is b.str) return 0;
 		if (str   is null ) return -1;

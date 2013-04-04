@@ -142,7 +142,8 @@ template processFuncs()
 			if(name in terminals)
 			{
 				duplicate = true;
-				if(name == Insensitive("Whitespace") && usingDefaultWhitespace)
+				auto cmp = Insensitive("Whitespace");
+				if(name == cmp && usingDefaultWhitespace)
 				{
 					duplicate = false;
 					usingDefaultWhitespace = false;
@@ -154,13 +155,18 @@ template processFuncs()
 			
 			if(!duplicate)
 			{
-				if(name == Insensitive("Whitespace"))
+				auto cmp1 = Insensitive("Whitespace");
+				auto cmp2 = Insensitive("Comment Line");
+				auto cmp3 = Insensitive("Comment Start");
+				auto cmp4 = Insensitive("Comment End");
+
+				if(name == cmp1)
 					sym.type = SymbolType.Whitespace;
-				else if(name == Insensitive("Comment Line"))
+				else if(name == cmp2)
 					sym.type = SymbolType.CommentLine;
-				else if(name == Insensitive("Comment Start"))
+				else if(name == cmp3)
 					sym.type = SymbolType.CommentStart;
-				else if(name == Insensitive("Comment End"))
+				else if(name == cmp4)
 					sym.type = SymbolType.CommentEnd;
 
 				sym.regex = new ASTRegex();
@@ -381,10 +387,13 @@ template processFuncs()
 				terminals[termName].regex = regex;
 			}
 			
+			auto cmp1 = Insensitive("Comment Line");
+			auto cmp2 = Insensitive("Comment Start");
+			auto cmp3 = Insensitive("Comment End");
 			if(
-				termName == Insensitive("Comment Line")  || 
-				termName == Insensitive("Comment Start") || 
-				termName == Insensitive("Comment End")   || 
+				termName == cmp1  || 
+				termName == cmp2  || 
+				termName == cmp3  || 
 				termName in terminals && (
 					terminals[termName].type == SymbolType.Whitespace   || 
 					terminals[termName].type == SymbolType.CommentLine  || 

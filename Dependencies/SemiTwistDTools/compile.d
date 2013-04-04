@@ -19,7 +19,9 @@ int main(string[] args)
 	addCompTarget("semitwist", "./bin", "semitwist", BUILD.LIB);
 	addSource("src/semitwist/util");
 	addSingleFile("src/semitwist/treeout.d");
-	
+	addSingleFile("src/semitwist/refbox.d");
+	addSingleFile("src/semitwist/cmdlineparser.d");
+
 	checkProgram("dmd", "Cannot find dmd to compile project! You can get it from http://dlang.org/download.html");
 	// Компиляция!
 	return proceedCmd(args);

@@ -91,7 +91,9 @@ void compileGLFW3(string libPath)
 void compileGoldie(string libPath)
 {
 	writeln("Building Goldie...");
-	system("cd "~libPath~" && rdmd compile.d all debug");
+	system("cd "~libPath~" && rdmd compile.d grmc release");
+	system("cd "~libPath~" && rdmd compile.d staticlang release");
+	system("cd "~libPath~" && rdmd compile.d goldie debug");
 }
 
 void compileSemiTwistDTools(string libPath)

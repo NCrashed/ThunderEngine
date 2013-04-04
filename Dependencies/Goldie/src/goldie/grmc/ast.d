@@ -484,7 +484,8 @@ class AST
 		// Terminals
 		void addTerm(Insensitive name, ref ASTTerminal sym)
 		{
-			if(name == Insensitive("Whitespace"))
+			auto cmp = Insensitive("Whitespace");
+			if(name == cmp)
 				sym.id = defaultWhitespaceTerminal.id;
 			else
 			{
@@ -565,7 +566,8 @@ class AST
 					newRule.subSymbolIndicies ~= nonterminals[subSym.symbolName].id;
 				else
 				{
-					if(subSym.symbolName != Insensitive(null))
+					auto cmp = Insensitive(null);
+					if(subSym.symbolName != cmp)
 						newRule.subSymbolIndicies ~= terminals[subSym.symbolName].id;
 				}
 			}
@@ -922,12 +924,13 @@ class ASTRegexItem
 	override string toString()
 	{
 		string str;
+		auto cmp = Insensitive(null);
 		if(regex !is null)                   str = regex.toString();
 		if(charSetLiteral !is null)          str = "["~charSetLiteral~"]";
-		if(charSetName != Insensitive(null)) str = "{"~charSetName.toString()~"}";
+		if(charSetName != cmp) 				 str = "{"~charSetName.toString()~"}";
 		if(termLiteral !is null)             str = "'"~termLiteral~"'";
 		
-		if(regex is null && charSetLiteral is null && charSetName == Insensitive(null) && termLiteral is null)
+		if(regex is null && charSetLiteral is null && charSetName == cmp && termLiteral is null)
 			str = "-!NULL!-";
 		
 		switch(kleene)

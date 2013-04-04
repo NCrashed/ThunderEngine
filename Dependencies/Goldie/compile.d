@@ -1,8 +1,5 @@
 #!/usr/bin/rdmd
-/// Скрипт автоматической компиляции проекта под Linux и Windows
-/** 
- * Очень важно установить пути к зависимостям (смотри дальше), 
- */
+/// Script for automatic building Goldie for Linux and Windows
 module compile;
 
 import dmake;
@@ -23,16 +20,31 @@ void compileSemiTwist(string libPath)
 }
 
 //======================================================================
-//							Основная часть
+//							Main part
 //======================================================================
 int main(string[] args)
 {
-	// Клиент
+	// grmc
+	addCompTarget("grmc", "./bin", "goldie-grmc", BUILD.APP);
+	setDependPaths(depends);
+	addSource("src/goldie");
+	addSource("src/tools/grmc");
+	addSingleFile("src/tools/util.d");
+	addLibraryFiles("semitwist", "bin", ["semitwist"], ["src"], &compileSemiTwist);
+
+	// staticlang
+	addCompTarget("staticlang", "./bin", "goldie-staticlang", BUILD.APP);
+	setDependPaths(depends);
+	addSource("src/goldie");
+	addSource("src/tools/staticlang");
+	addSingleFile("src/tools/util.d");
+	addLibraryFiles("semitwist", "bin", ["semitwist"], ["src"], &compileSemiTwist);
+
+	// Lib for ThunderEngine
 	addCompTarget("goldie", "./bin", "goldie", BUILD.LIB);
 	setDependPaths(depends);
 	addSource("src/goldie");
 	addSingleFile("src/tools/util.d");
-
 	addLibraryFiles("semitwist", "bin", ["semitwist"], ["src"], &compileSemiTwist);
 
 	checkProgram("dmd", "Cannot find dmd to compile project! You can get it from http://dlang.org/download.html");

@@ -348,12 +348,13 @@ NFA toNFA(AST ast, ASTRegexSeq seq)
 NFA toNFA(AST ast, ASTRegexItem item)
 {
 	NFA nfa;
+	auto cmp = Insensitive(null);
 	
 	if(item.regex)
 		nfa = toNFA(ast, item.regex);
 	else if(item.charSetLiteral)
 		nfa = charSetDataToNFA( to!dstring(item.charSetLiteral) );
-	else if(item.charSetName != Insensitive(null))
+	else if(item.charSetName != cmp)
 		nfa = charSetDataToNFA( ast.charSetNameToData(item.charSetName), item.charSetName.toString() );
 	else if(item.termLiteral)
 	{
