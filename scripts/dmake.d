@@ -5,7 +5,7 @@
 
 // Written in the D programming language.
 /**
-*	Version: 1.02
+*	Version: 1.03
 *	License: Boost Version 1.0
 *
 *	This module simplifies crossplatform compilation for multifile projects. Module provides
@@ -458,6 +458,17 @@ void addSource(string dir)
 
 }
 
+///addGeneratedSources
+/**
+*	Check sources to appeare after custom command execution. Function helps
+*	to add generated sources (parsers from grammar for instance) which doesn't
+*	exists when $(B addSource) runs.
+*/
+void addGeneratedSources(string dir)
+{
+	mCurrTarget.generatedSourceDirs ~= dir;
+}
+
 /// addSingleFile
 /**
 *	Occasionally situation occurs when needed add only some files to compilation target and $(D addSource) doesn't suit.
@@ -582,6 +593,31 @@ private int compileTarget(ref CompilationTarget target)
 					writeln("Custom commands failed. Compilation stopped.");
 					return 1;
 				}
+		}
+		if(generatedSourceDirs.length > 0)
+		{
+			foreach(dir; generatedSourceDirs)
+			{
+				if (dir.empty) continue;
+				SpanMode mode = SpanMode.breadth;
+
+				target.sourcePaths ~= dir;
+				target.addFlags ~= "-I"~dir~" ";
+				auto direntries = dirEntries(dir, mode, true);
+
+				auto list = filter!`endsWith(a.name,".d")`(direntries);
+				foreach(path; list)
+				{
+					target.addFlags ~= path.name~" "; 
+				}
+
+				direntries = dirEntries(dir, mode, true);
+				auto list2 = filter!`endsWith(a.name,".di")`(direntries);
+				foreach(path; list2)
+				{
+					target.addFlags ~= path.name~" "; 
+				}
+			}
 		}
 
 		if(type == BUILD.NONE)
@@ -880,6 +916,7 @@ class CompilationTarget
 
 	MODEL					buildModel;
 	string function()[]		customCommands;
+	string[]				generatedSourceDirs;
 
 	this(string pOutName = "", string pOutDir = "", BUILD pType = BUILD.APP)
 	{
@@ -890,6 +927,7 @@ class CompilationTarget
 		dependTargets = new CompilationTarget[0];
 		sourcePaths = new string[0];
 		customCommands = new string function()[0];
+		generatedSourceDirs = new string[0];
 
 		version(X86_64)
 			buildModel = MODEL.X86_64;

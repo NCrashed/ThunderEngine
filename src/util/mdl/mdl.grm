@@ -1,0 +1,313 @@
+!Grammar for mdl model format
+"Name" 		= 'MDL'
+"Author" 	= 'NCrashed'
+"Version"	= '0.01'
+"About"		= 'war3 model format'
+"Case Sensitive" = true
+
+"Start Symbol" = <Everything>
+
+Comment Line  = '//'
+Comment Start = '/*'
+Comment End   = '*/'
+
+! -- Terminals -----------------------------------------
+Integer = ('+'|'-')? {Digit}+ ( ('e'|'E') ('+'|'-')? {Digit}+)?
+Rational = ('+'|'-')? {Digit}+ '.' {Digit}* ( ('e'|'E') ('+'|'-')? {Digit}+)?
+
+{String Char} = {Printable} - ["\]
+Literal = '"' ({String Char} | '\'{Printable})* '"'
+
+! -- General rules -------------------------------------
+<Real> ::= Rational | Integer
+<Vector4> ::= '{' <Real> ',' <Real> ',' <Real> ',' <Real> '}'
+<Vector3> ::= '{' <Real> ',' <Real> ',' <Real> '}'
+<Vector2> ::= '{' <Real> ',' <Real> '}'
+<Vector2Int> ::= '{' Integer ',' Integer '}'
+<Vector6Int> ::= '{' Integer ',' Integer ',' Integer ',' Integer ',' Integer ',' Integer '}'
+
+<IntArrayList> ::= <IntArrayList> ',' Integer | Integer
+<IntArray> ::= '{' <IntArrayList> '}'
+
+! -- Rules ---------------------------------------------
+<FormatVersionVal> ::= Integer
+<FormatVersion> ::= 'FormatVersion' <FormatVersionVal> ','
+<VersionSection> ::= 'Version' '{' <FormatVersion> '}'
+
+! -- Model section ------------------------------------
+<ModelNumGeosetsVal> 			::= Integer
+<ModelNumGeosetAnimsVal> 		::= Integer
+<ModelNumLightsVal>				::= Integer
+<ModelNumHelpersVal>			::= Integer
+<ModelNumBonesVal>				::= Integer
+<ModelNumAttachmentsVal>		::= Integer
+<ModelNumParticleEmittersVal>	::= Integer
+<ModelNumParticleEmitters2Val>	::= Integer
+<ModelNumRibbonEmittersVal>		::= Integer
+<ModelNumEventsVal>				::= Integer
+<ModelBlendTimeVal>				::= <Real>
+<ModelMinimumExtentVal>			::= <Vector3>
+<ModelMaximumExtentVal>			::= <Vector3>
+<ModelBoundsRadiusVal>			::= <Real>
+
+<ModelName> 				::= Literal
+<ModelNumGeosets> 			::= 'NumGeosets' 			<ModelNumGeosetsVal> 			
+<ModelNumGeosetAnims> 		::= 'NumGeosetAnims' 		<ModelNumGeosetAnimsVal> 		
+<ModelNumLights> 			::= 'NumLights' 			<ModelNumLightsVal> 				
+<ModelNumHelpers> 			::= 'NumHelpers' 			<ModelNumHelpersVal> 			
+<ModelNumBones>				::= 'NumBones' 				<ModelNumBonesVal> 				
+<ModelNumAttachments>		::= 'NumAttachments' 		<ModelNumAttachmentsVal> 		
+<ModelNumParticleEmitters> 	::= 'NumParticleEmitters' 	<ModelNumParticleEmittersVal> 	
+<ModelNumParticleEmitters2>	::= 'NumParticleEmitters2' 	<ModelNumParticleEmitters2Val> 	
+<ModelNumRibbonEmitters>	::= 'NumRibbonEmitters' 	<ModelNumRibbonEmittersVal> 		
+<ModelNumEvents>			::= 'NumEvents' 			<ModelNumEventsVal> 				
+<ModelBlendTime>			::= 'BlendTime' 			<ModelBlendTimeVal> 				
+<ModelMinimumExtent>		::= 'MinimumExtent' 		<ModelMinimumExtentVal> 			
+<ModelMaximumExtent>		::= 'MaximumExtent' 		<ModelMaximumExtentVal> 			
+<ModelBoundsRadius>			::= 'BoundsRadius' 			<ModelBoundsRadiusVal> 			
+
+<ModelVar> ::= <ModelNumGeosets> 
+	| <ModelNumGeosetAnims>
+    | <ModelNumLights> 
+	| <ModelNumHelpers>
+	| <ModelNumBones>
+	| <ModelNumAttachments>
+	| <ModelNumParticleEmitters>
+	| <ModelNumParticleEmitters2>
+	| <ModelNumRibbonEmitters>
+	| <ModelNumEvents>
+	| <ModelBlendTime>	
+	| <ModelMinimumExtent>	
+	| <ModelMaximumExtent>
+	| <ModelBoundsRadius>
+
+<ModelVarsList> ::= <ModelVarsList> <ModelVar> ',' | <ModelVar> ','
+<ModelSection> ::= 'Model' <ModelName> '{' <ModelVarsList> '}'
+
+! -- Sequences -----------------------------------------------------
+<AnimationName> 		::= Literal
+<AnimIntervalVal>		::= <Vector2Int>
+<AnimRarityVal>			::= <Real>
+<AnimMoveSpeedVal>		::= <Real>
+<AnimMinimumExtentVal>	::= <Vector3>
+<AnimMaximumExtentVal>	::= <Vector3>
+<AnimBoundsRadiusVal>	::= <Real>
+
+<AnimInterval> 			::= 'Interval'		<AnimIntervalVal>
+<AnimRarity> 			::= 'Rarity'		<AnimRarityVal>
+<AnimMoveSpeed>			::= 'MoveSpeed'		<AnimMoveSpeedVal>
+<AnimNonLooping>		::= 'NonLooping'
+<AnimMinimumExtent>		::= 'MinimumExtent'	<AnimMinimumExtentVal>
+<AnimMaximumExtent>		::= 'MaximumExtent' <AnimMaximumExtentVal>
+<AnimBoundsRadius>		::= 'BoundsRadius'	<AnimBoundsRadiusVal>
+
+<AnimationVar> ::= <AnimInterval> 
+	| <AnimRarity>
+	| <AnimMoveSpeed>
+	| <AnimNonLooping>
+	| <AnimMinimumExtent>
+	| <AnimMaximumExtent>
+	| <AnimBoundsRadius>
+
+<AnimationVarsList> ::= <AnimationVarsList> <AnimationVar> ',' | <AnimationVar> ','
+<AnimationSection> ::= 'Anim' <AnimationName> '{' <AnimationVarsList> '}'
+
+<AnimSectionsList> ::= <AnimSectionsList> <AnimationSection> | <AnimationSection>
+<SequencesSection> ::= 'Sequences' Integer '{' <AnimSectionsList> '}'
+! -- GlobalSequences -------------------------------------------------------------
+
+<GlobalSequencesCount> 		::= Integer
+<GlobalSequenceDuration> 	::= Integer
+<GlobalSequencesVarsList> 	::= <GlobalSequencesVarsList> 'Duration' <GlobalSequenceDuration> ',' | 'Duration' <GlobalSequenceDuration> ','
+<GlobalSequencesSection> 	::= 'GlobalSequences' <GlobalSequencesCount> '{' <GlobalSequencesVarsList> '}'
+! -- Textures -------------------------------------------------------------
+
+<TexturesCount>				::= Integer
+<BitmapImageVal>			::= Literal
+<BitmapReplaceableIdVal> 	::= Integer
+
+<BitmapImage> 			::= 'Image' <BitmapImageVal>
+<BitmapWrapWidth> 		::= 'WrapWidth'
+<BitmapWrapHeight>		::= 'WrapHeight'
+<BitmapReplaceableId> 	::= 'ReplaceableId' <BitmapReplaceableIdVal>
+
+<BitmapVar> ::= <BitmapImage>
+	| <BitmapWrapWidth>
+	| <BitmapWrapHeight>
+	| <BitmapReplaceableId>
+
+<BitmapVarsList> 		::= <BitmapVarsList> <BitmapVar> ',' | <BitmapVar> ','
+<BitmapSection> 		::= 'Bitmap' '{' <BitmapVarsList> '}'
+<BitmapSectionsList> 	::= <BitmapSectionsList> <BitmapSection> | <BitmapSection>
+<TexturesSection> 		::= 'Textures' <TexturesCount> '{' <BitmapSectionsList> '}'
+! -- Materials -------------------------------------------------------------
+
+<AnimationType> 			::= 'DontInterp' | 'Linear'
+
+<TextureAnimationKey> 		::=  Integer ':' <Real>
+<TextureAnimationKeyList> 	::= <TextureAnimationKeyList> <TextureAnimationKey> ',' | <TextureAnimationKey> ','
+<LayerTextureIDSection> 	::= 'TextureID' <LayerTextureIDVal> '{' <AnimationType> ',' <TextureAnimationKeyList> '}'
+
+<AlphaAnimationKey> 	::= Integer ':' <Real>
+<AlphaAnimationKeyList> ::= <AlphaAnimationKeyList> <AlphaAnimationKey> ',' | <AlphaAnimationKey> ','
+<LayerAlphaSection> 	::= 'Alpha' Integer '{' <AnimationType> ',' <AlphaAnimationKeyList> '}'
+
+<FilterModeEnum> 		::= 'None' | 'Transparent' | 'Blend' | 'Additive' | 'AddAlpha' | 'Modulate' | 'Modulate2x'
+<LayerTextureIDVal> 	::= Integer
+<LayerAlphaVal> 		::= <Real>
+<LayerTVertexAnimIdVal> ::= Integer
+<LayerCoordIdVal>		::= Integer
+
+<LayerFilterMode> 	::= 'FilterMode' <FilterModeEnum>
+<LayerUnshaded> 	::= 'Unshaded'
+<LayerUnfogged> 	::= 'Unfogged'
+<LayerTextureID> 	::= 'static' 'TextureID' <LayerTextureIDVal>
+<LayerTwoSided> 	::= 'TwoSided'
+<LayerSphereEnvMap> ::= 'SphereEnvMap'
+<LayerNoDepthTest> 	::= 'NoDepthTest'
+<LayerNoDepthSet> 	::= 'NoDepthSet'
+<LayerAlpha> 		::= 'static' 'Alpha' <LayerAlphaVal>
+<LayerTVertexAnimId>::= 'TVertexAnimId' <LayerTVertexAnimIdVal>
+<LayerCoordId>		::= 'CoordId' <LayerCoordIdVal>
+
+<LayerVar> ::= <LayerFilterMode>
+	| <LayerUnshaded>
+	| <LayerUnfogged>
+	| <LayerTextureID>
+	| <LayerTwoSided>
+	| <LayerSphereEnvMap>
+	| <LayerNoDepthTest>
+	| <LayerNoDepthSet>
+	| <LayerAlpha>
+	| <LayerTVertexAnimId>
+	| <LayerCoordId>
+
+<LayerVarsList> ::= <LayerVarsList> <LayerVar> ',' | <LayerVar> ',' 
+	| <LayerVarsList> <LayerAlphaSection> | <LayerAlphaSection> 
+	| <LayerVarsList> <LayerTextureIDSection> | <LayerTextureIDSection>
+
+<LayerSection> ::= 'Layer' '{' <LayerVarsList> '}'
+
+<MaterialsCount> ::= Integer
+<MaterialPriorityPlaneVal> ::= Integer
+
+<MaterialConstantColor> ::= 'ConstantColor'
+<MaterialSortPrimsFarZ> ::= 'SortPrimsFarZ'
+<MaterialFullResolution>::= 'FullResolution'
+<MaterialPriorityPlane> ::= 'PriorityPlane' <MaterialPriorityPlaneVal>
+
+<MaterialVar> ::= <MaterialConstantColor>
+	| <MaterialSortPrimsFarZ>
+	| <MaterialFullResolution>
+	| <MaterialPriorityPlane>
+
+<MaterialVarsList> ::= <MaterialVarsList> <MaterialVar> ',' | <MaterialVar> ','
+	| <MaterialVarsList> <LayerSection> | <LayerSection>
+
+<MaterialSection> ::= 'Material' '{' <MaterialVarsList> '}'
+<MaterialsList> ::= <MaterialsList> <MaterialSection> | <MaterialSection>
+<MaterialsSection> ::= 'Materials' <MaterialsCount> '{' <MaterialsList> '}'
+! -- TextureAnims -------------------------------------------------------------
+<TVertexTransformationType>		::= 'DontInterp' | 'Linear' | 'Hermite' | 'Bezier'
+<TransformationFramesCount>		::= Integer
+
+<TVertexFramePosition>	::=	Integer ':' <Vector3> | Integer ':' <Vector4>
+<TVertexFrameInTan>		::= 'InTan'	 <Vector3>
+<TVertexFrameOutTan>	::=	'OutTan' <Vector3>
+
+<TVertexFrame>					::= <TVertexFramePosition> | <TVertexFrameInTan> | <TVertexFrameOutTan>
+<TVertexFramesList>				::= <TVertexFramesList> <TVertexFrame> ',' | <TVertexFrame> ',' 
+
+<TranslationTransformation>		::= 'Translation' <TransformationFramesCount> '{' <TVertexTransformationType> ',' <TVertexFramesList> '}'
+<RotationTransformation>		::= 'Rotation' <TransformationFramesCount> '{' <TVertexTransformationType> ',' <TVertexFramesList> '}'
+<ScalingTransformation>			::= 'Scaling' <TransformationFramesCount> '{' <TVertexTransformationType> ',' <TVertexFramesList> '}'
+
+<Transformation>				::= <TranslationTransformation> | <RotationTransformation> | <ScalingTransformation>
+
+<TVertexTransformationsList> 	::= <TVertexTransformationsList> <Transformation> | <Transformation>
+<TVertexAnimSection>			::= 'TVertexAnim' '{' <TVertexTransformationsList> '}'
+
+<TextureAnimsCount>		::= Integer
+<TVertexAnimSectionList>::= <TVertexAnimSectionList> <TVertexAnimSection> | <TVertexAnimSection>
+<TextureAnimsSection>	::= 'TextureAnims' <TextureAnimsCount> '{' <TVertexAnimSectionList> '}'
+! -- Geoset -------------------------------------------------------------
+
+<GeosetAnimMinimumExtentVal> ::= <Vector3>
+<GeosetAnimMaximumExtentVal> ::= <Vector3>
+<GeosetAnimBoundsRadiusVal>  ::= <Real>
+
+<GeosetAnimMinimumExtent> ::= 'MinimumExtent' <GeosetAnimMinimumExtentVal>
+<GeosetAnimMaximumExtent> ::= 'MaximumExtent' <GeosetAnimMaximumExtentVal>
+<GeosetAnimBoundsRadius>  ::= 'BoundsRadius' <GeosetAnimBoundsRadiusVal>
+
+<GeosetAnimVar> ::= <GeosetAnimMinimumExtent>
+	| <GeosetAnimMaximumExtent>
+	| <GeosetAnimBoundsRadius>
+
+<GeosetAnimVarList>		::= <GeosetAnimVarList> <GeosetAnimVar> ',' | <GeosetAnimVar> ','
+<GeosetAnimSection>		::= 'Anim' '{' <GeosetAnimVarList> '}'
+
+<GeosetGroupMatrix>			::= 'Matrices' <IntArray>
+<GeosetGroupMatrices>		::= <GeosetGroupMatrices> <GeosetGroupMatrix> ',' | <GeosetGroupMatrix> ',' 
+<GeosetGroupMatricesCount> 	::= Integer
+<GeosetGroupsCount>			::= Integer
+<GeosetGroupsSection>		::= 'Groups' <GeosetGroupMatricesCount> <GeosetGroupsCount> '{' <GeosetGroupMatrices> '}'
+
+<GeosetTrianglesList>			::= <GeosetTrianglesList> <Vector6Int> ',' | <Vector6Int> ','
+<FacesTrianglesSection>			::= 'Triangles' '{' <GeosetTrianglesList> '}'
+<GeosetTrianglesSectionsList>	::= <GeosetTrianglesSectionsList> <FacesTrianglesSection> | <FacesTrianglesSection>
+<GeosetFacesCount>				::= Integer
+<GeosetFacesSection>			::= 'Faces' <GeosetFacesCount> Integer '{' <GeosetTrianglesSectionsList> '}'
+
+<GeosetVertexGroupVal>		::= Integer
+<GeosetVertexGroupsList>	::= <GeosetVertexGroupsList> <GeosetVertexGroupVal> ',' | <GeosetVertexGroupVal> ','
+<GeosetVertexGroupSection>	::= 'VertexGroup' '{' <GeosetVertexGroupsList> '}'
+
+<GeosetTVerticesList>		::= <GeosetTVerticesList> <Vector2> ',' | <Vector2> ','
+<GeosetTVerticesCount>		::= Integer
+<GeosetTVerticesSection>	::= 'TVertices' <GeosetTVerticesCount> '{' <GeosetTVerticesList> '}'
+
+<GeosetNormalsList>		::= <GeosetNormalsList> <Vector3> ',' | <Vector3> ','
+<GeosetNormalsCount>	::= Integer
+<GeosetNormalsSection>	::= 'Normals' <GeosetNormalsCount> '{' <GeosetNormalsList> '}'
+
+<GeosetVerticesList>	::= <GeosetVerticesList> <Vector3> ',' | <Vector3> ','
+<GeosetVerticesCount>	::= Integer
+<GeosetVerticesSection> ::= 'Vertices' <GeosetVerticesCount> '{' <GeosetVerticesList> '}'
+
+<GeosetInnerSection> ::= <GeosetVerticesSection>
+	| <GeosetNormalsSection>
+	| <GeosetTVerticesSection>
+	| <GeosetVertexGroupSection>
+	| <GeosetFacesSection>
+	| <GeosetGroupsSection>
+	| <GeosetAnimSection>
+
+<GeosetMinimumExtentVal>	::= <Vector3>
+<GeosetMaximumExtentVal>	::= <Vector3>
+<GeosetBoundsRadiusVal>		::= <Real>
+<GeosetMaterialIDVal>		::= Integer
+<GeosetSelectionGroupVal>	::= Integer
+
+<GeosetMinimumExtent> 	::= 'MinimumExtent' <GeosetMinimumExtentVal>
+<GeosetMaximumExtent> 	::= 'MaximumExtent' <GeosetMaximumExtentVal>
+<GeosetBoundsRadius> 	::= 'BoundsRadius' <GeosetBoundsRadiusVal>
+<GeosetMaterialID>		::= 'MaterialID' <GeosetMaterialIDVal>
+<GeosetSelectionGroup>	::= 'SelectionGroup' <GeosetSelectionGroupVal>
+<GeosetUnselectable>	::= 'Unselectable'
+
+<GeosetVar> ::= <GeosetMinimumExtent>
+	| <GeosetMaximumExtent>
+	| <GeosetBoundsRadius>
+	| <GeosetMaterialID>
+	| <GeosetSelectionGroup>
+	| <GeosetUnselectable>
+
+<GeosetVarList>		::= <GeosetVarList>	<GeosetInnerSection> | <GeosetInnerSection>
+	| <GeosetVarList> <GeosetVar> ',' | <GeosetVar> ','
+
+<GeosetSection> 	::= 'Geoset' '{' <GeosetVarList> '}'
+<GeosetSections> 	::= <GeosetSections> <GeosetSection> | <GeosetSection>
+! -- -------------------------------------------------------------
+
+<Everything> ::= <VersionSection> <ModelSection> <SequencesSection> <GlobalSequencesSection> <TexturesSection> <MaterialsSection> <TextureAnimsSection> <GeosetSections>

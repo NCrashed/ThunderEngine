@@ -31,6 +31,8 @@ static this()
 		"Derelict3": "../Dependencies/Derelict3",
 		"GLFW3": "../Dependencies/GLFW3",
 		"FreeImage": "../Dependencies/FreeImage",
+		"Goldie": "../Dependencies/Goldie",
+		"SemiTwistDTools": "../Dependencies/SemiTwistDTools",
 	];
 
 	derelictLibs =
@@ -41,12 +43,12 @@ static this()
 		"DerelictFI",
 	];
 
-	/*
+	
 	serverDepends =
 	[
-		"Orange": "../Dependencies/orange"
+		"Goldie": "../Dependencies/Goldie",
+		"SemiTwistDTools": "../Dependencies/SemiTwistDTools",
 	];
-	*/
 }
 
 void compileFreeImage(string libPath)
@@ -86,11 +88,43 @@ void compileGLFW3(string libPath)
 	}
 }
 
+void compileGoldie(string libPath)
+{
+	writeln("Building Goldie...");
+	system("cd "~libPath~" && rdmd compile.d all debug");
+}
+
+void compileSemiTwistDTools(string libPath)
+{
+	writeln("Building SemiTwistDTools...");
+	system("cd "~libPath~" && rdmd compile.d all release");
+}
+
+string compileMDLGrammar()
+{
+	version(Windows)
+		return "cd ..\\src && echo Building mdl grammar... && ..\\Dependencies\\Goldie\\bin\\goldie-grmc util\\mdl\\mdl.grm && ..\\Dependencies\\Goldie\\bin\\goldie-staticlang mdl.cgt --pack=util.mdl.mdlparser";
+	version(linux)
+		return "cd ../src && echo Building mdl grammar... && ../Dependencies/Goldie/bin/goldie-grmc util/mdl/mdl.grm && ../Dependencies/Goldie/bin/goldie-staticlang mdl.cgt --pack=util.mdl.mdlparser";		
+}
+
+void cleanupMDLParser()
+{
+	writeln("Removing old mdl parser...");
+	version(Windows)
+		system("del /q ..\\src\\util\\mdl\\mdlparser");
+	version(linux)
+		system("rm -rf ../src/util/mdl/mdlparser");
+}
+
 //======================================================================
 //							Основная часть
 //======================================================================
 int main(string[] args)
 {
+	// Cleaning
+	cleanupMDLParser();
+
 	// Клиент
 	addCompTarget("client", "../bin", "ThunderClient", BUILD.APP);
 	setDependPaths(clientDepends);
@@ -105,8 +139,14 @@ int main(string[] args)
 				system("cd "~libPath~`/build && dmd build.d && ./build`);	
 		});
 
+	addLibraryFiles("SemiTwistDTools", "bin", ["semitwist"], ["src"], &compileSemiTwistDTools);
+	addLibraryFiles("Goldie", "bin", ["goldie"], ["src"], &compileGoldie);
+	
 	checkSharedLibraries("GLFW3", ["glfw3"], &compileGLFW3);
 	checkSharedLibraries("FreeImage", ["freeimage"], &compileFreeImage);
+
+	addCustomCommand(&compileMDLGrammar);
+	addGeneratedSources("../src/util/mdl/mdlparser");
 
 	addSource("../src/client");
 	addSource("../src/util");
@@ -117,9 +157,15 @@ int main(string[] args)
 	addCompTarget("server", "../bin", "ThunderServer", BUILD.APP);
 	setDependPaths(serverDepends);
 
+	addLibraryFiles("SemiTwistDTools", "bin", ["semitwist"], ["src"], &compileSemiTwistDTools);
+	addLibraryFiles("Goldie", "bin", ["goldie"], ["src"], &compileGoldie);
+
+	addCustomCommand(&compileMDLGrammar);
+	addGeneratedSources("../src/util/mdl/mdlparser");
+
 	addSource("../src/server");
 	addSource("../src/util");
-	
+
 	addCustomFlags("-D -Dd../docs ../docs/candydoc/candy.ddoc ../docs/candydoc/modules.ddoc");
 
 	checkProgram("dmd", "Cannot find dmd to compile project! You can get it from http://dlang.org/download.html");
