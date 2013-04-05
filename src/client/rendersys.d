@@ -70,7 +70,7 @@ class RenderSystem
         {
             DerelictGL3.load();
             DerelictGLFW3.load("./libglfw3.so");
-            DerelictFI.load();      
+            DerelictFI.load("./libfreeimage.so");      
         }
 
         createLog(RENDER_LOG);
@@ -558,10 +558,16 @@ private GLuint LoadShaders(string vertex_file_path, string fragment_file_path)
     // Check Vertex Shader
     glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &Result);
     glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-    auto VertexShaderErrorMessage = new char[InfoLogLength];
-    glGetShaderInfoLog(VertexShaderID, InfoLogLength, null, &VertexShaderErrorMessage[0]);
-    writeLog(VertexShaderErrorMessage.idup, LOG_ERROR_LEVEL.NOTICE, RENDER_LOG);
- 
+    if(InfoLogLength > 0)
+    {
+        auto VertexShaderErrorMessage = new char[InfoLogLength];
+        glGetShaderInfoLog(VertexShaderID, InfoLogLength, null, &VertexShaderErrorMessage[0]);
+        writeLog(VertexShaderErrorMessage.idup, LOG_ERROR_LEVEL.NOTICE, RENDER_LOG);
+    } else
+    {
+        writeLog("No output from vertex shader compilation.", LOG_ERROR_LEVEL.WARNING, RENDER_LOG);
+    }
+
     // Compile Fragment Shader
     writeLog("Compiling shader : "~fragment_file_path, LOG_ERROR_LEVEL.NOTICE, RENDER_LOG);
     auto FragmentSourcePointer = toStringz(FragmentShaderCode);
@@ -571,9 +577,15 @@ private GLuint LoadShaders(string vertex_file_path, string fragment_file_path)
     // Check Fragment Shader
     glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
     glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-    auto FragmentShaderErrorMessage = new char[InfoLogLength];
-    glGetShaderInfoLog(FragmentShaderID, InfoLogLength, null, &FragmentShaderErrorMessage[0]);
-    writeLog(FragmentShaderErrorMessage.idup, LOG_ERROR_LEVEL.NOTICE, RENDER_LOG);
+    if(InfoLogLength > 0)
+    {
+        auto FragmentShaderErrorMessage = new char[InfoLogLength];
+        glGetShaderInfoLog(FragmentShaderID, InfoLogLength, null, &FragmentShaderErrorMessage[0]);
+        writeLog(FragmentShaderErrorMessage.idup, LOG_ERROR_LEVEL.NOTICE, RENDER_LOG);
+    } else
+    {
+        writeLog("No output from fragment shader compilation.", LOG_ERROR_LEVEL.WARNING, RENDER_LOG);
+    }
  
     // Link the program
     writeLog("Linking program", LOG_ERROR_LEVEL.NOTICE, RENDER_LOG);
@@ -585,10 +597,16 @@ private GLuint LoadShaders(string vertex_file_path, string fragment_file_path)
     // Check the program
     glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
     glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-    auto ProgramErrorMessage = new char[InfoLogLength];
-    glGetProgramInfoLog(ProgramID, InfoLogLength, null, &ProgramErrorMessage[0]);
-    writeLog(ProgramErrorMessage.idup, LOG_ERROR_LEVEL.NOTICE, RENDER_LOG);
- 
+    if(InfoLogLength > 0)
+    {
+        auto ProgramErrorMessage = new char[InfoLogLength];
+        glGetProgramInfoLog(ProgramID, InfoLogLength, null, &ProgramErrorMessage[0]);
+        writeLog(ProgramErrorMessage.idup, LOG_ERROR_LEVEL.NOTICE, RENDER_LOG);
+    } else
+    {
+        writeLog("No output from shader linking.", LOG_ERROR_LEVEL.WARNING, RENDER_LOG);
+    }
+
     glDeleteShader(VertexShaderID);
     glDeleteShader(FragmentShaderID);
  

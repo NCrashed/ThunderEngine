@@ -38,13 +38,15 @@ alias FSMState!(FSMType.DFA) _DFAState;
 
 final class FSMState(FSMType fsmType)
 {
+	private alias FSMState!(FSMType.NFA) InnerNFAState;
+
 	FSMEdge!fsmType[] edges;
 	int acceptSymbolId; // -1 for "none"
 	string acceptSymbolName;
 	
 	static if(fsmType == FSMType.DFA)
 	{
-		NFAState[] nfaStates;
+		InnerNFAState[] nfaStates;
 		int[] ambiguousAcceptIds;
 	}
 	
@@ -52,8 +54,8 @@ final class FSMState(FSMType fsmType)
 	{
 		// The states that can be reached from here *in one step*
 		// without consuming any input. May contain duplicates.
-		private NFAState[] _partialClosure = null;
-		NFAState[] partialClosure()
+		private InnerNFAState[] _partialClosure = null;
+		InnerNFAState[] partialClosure()
 		{
 			if(_partialClosure is null)
 			{
@@ -66,14 +68,14 @@ final class FSMState(FSMType fsmType)
 		}
 
 		// The states that can be reached from here without consuming any input.
-		private NFAState[] _closure = null;
-		NFAState[] closure()
+		private InnerNFAState[] _closure = null;
+		InnerNFAState[] closure()
 		{
 			if(_closure is null)
 			{
 				_closure  = [this];
-				NFAState[] todo = [this];
-				bool[NFAState] found;
+				InnerNFAState[] todo = [this];
+				bool[InnerNFAState] found;
 				found[this] = true;
 				
 				while(todo.length > 0)
