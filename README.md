@@ -26,6 +26,15 @@ For automatic compilation go to script directory and call:
 $ rdmd compile.d all [debug|release]
 ```
 
+Under linux you should have at least following packages installed:
+* gcc
+* gcc-c++
+* dmd v2.062
+* cmake
+* mesa-libgl
+* mesa-libglu
+* randr
+
 Manual dependency compilation
 =============================
 
@@ -93,6 +102,32 @@ FreeImage provide project for VisualStudio, compile it and
 copy FreeImage.dll into project Bin directory. Compilation in debug 
 mode adds 'd' suffix to dll name, remove it.
 
+**[Goldie](http://www.semitwist.com/goldie/)**
+
+Used to generate mdl parser from grammar. Will be used to parse jass sources
+and other planning formats.
+
+**Compilation**
+
+In Goldie folder:
+```
+rdmd compile.d goldie debug
+rdmd compile.d grmc release
+rdmd compile.d staticlang release
+```
+
+**[SemiTwistDTools](https://bitbucket.org/Abscissa/semitwistdtools/wiki/Home)**
+
+Used by Goldie. Misc collection of tools, such as a case-insensitive string type, 
+enhanced unittest features, a build configuration tool (stbuild, a cmd-line front-end 
+for rdmd), useful mixins, etc.
+
+**Compilation**
+
+In SemiTwistDTools folder:
+```
+rdmd compile.d all release
+```
 
 Milestones
 ===========
