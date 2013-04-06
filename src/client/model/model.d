@@ -16,7 +16,6 @@ import util.vector;
 import util.log;
 
 import util.codec;
-import util.terrain.kdtree;
 import util.serialization.serializer;
 
 public import client.model.mesh;
@@ -96,41 +95,6 @@ class Model : Resource
 
 		auto stream = mCodec.decode(file);
 
-		loadFromStream(stream);
-	}
-
-	/// Загрузка из kd-дерева
-	/**
-	*	В большинстве случаев модель загружается из файла, но есть возможность
-	*	загрузить вручную.
-	*/
-	void load(StdKdTree tree, bool loadWire = false)
-	{
-		// Загружаем кодек
-		try
-		{
-			mCodec = CodecMng.getSingleton().getCodec("kdtree");
-			if(mCodec.standart != "model")
-			{
-				throw new Exception("Kdtree codec doesn't support 'model' stream format standart!");
-			}
-		} 
-		catch(Exception e)
-		{
-			writeLog("Failed to load model from tree. Reason: "~e.msg, LOG_ERROR_LEVEL.FATAL);
-			return;
-		}
-
-		// Запись указателя в поток
-		auto tempStream = new MemoryStream();
-		//tempStream.reserve((StdKdTree*).sizeof);
-
-		tempStream.writeExact(cast(void*)&tree, size_t.sizeof);
-		tempStream.writeExact(cast(void*)&loadWire, loadWire.sizeof);
-		tempStream.position = 0;
-
-		// Декодирование и загрузка
-		auto stream = mCodec.decode(tempStream);
 		loadFromStream(stream);
 	}
 
