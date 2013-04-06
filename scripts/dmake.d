@@ -596,26 +596,28 @@ private int compileTarget(ref CompilationTarget target)
 		}
 		if(generatedSourceDirs.length > 0)
 		{
+			import std.path;
 			foreach(dir; generatedSourceDirs)
 			{
 				if (dir.empty) continue;
 				SpanMode mode = SpanMode.breadth;
 
-				target.sourcePaths ~= dir;
-				target.addFlags ~= "-I"~dir~" ";
 				auto direntries = dirEntries(dir, mode, true);
+
+				auto flagsArr = splitter(target.addFlags, " ");
+				foreach(ref flag; flagsArr)
+				{
+					if(isValidPath(flag))
+					{
+						flag = buildNormalizedPath(flag);
+					}
+				}
 
 				auto list = filter!`endsWith(a.name,".d")`(direntries);
 				foreach(path; list)
 				{
-					target.addFlags ~= path.name~" "; 
-				}
-
-				direntries = dirEntries(dir, mode, true);
-				auto list2 = filter!`endsWith(a.name,".di")`(direntries);
-				foreach(path; list2)
-				{
-					target.addFlags ~= path.name~" "; 
+					if(canFind(flagsArr, buildNormalizedPath(path.name)))
+						target.addFlags ~= path.name~" "; 
 				}
 			}
 		}

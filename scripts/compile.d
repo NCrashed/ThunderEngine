@@ -9,6 +9,7 @@ import dmake;
 
 import std.stdio;
 import std.process;
+import std.file;
 
 // Здесь прописать пути к зависимостям клиента
 string[string] clientDepends;
@@ -104,19 +105,26 @@ void compileSemiTwistDTools(string libPath)
 
 string compileMDLGrammar()
 {
-	version(Windows)
-		return "cd ..\\src && echo Building mdl grammar... && ..\\Dependencies\\Goldie\\bin\\goldie-grmc util\\mdl\\mdl.grm && ..\\Dependencies\\Goldie\\bin\\goldie-staticlang mdl.cgt --pack=util.mdl.mdlparser";
-	version(linux)
-		return "cd ../src && echo Building mdl grammar... && ../Dependencies/Goldie/bin/goldie-grmc util/mdl/mdl.grm && ../Dependencies/Goldie/bin/goldie-staticlang mdl.cgt --pack=util.mdl.mdlparser";		
+	if(!exists("../src/mdl.cgt") || !exists("../src/util/mdl/mdlparser"))
+	{
+		version(Windows)
+			return "cd ..\\src && echo Building mdl grammar... && ..\\Dependencies\\Goldie\\bin\\goldie-grmc util\\mdl\\mdl.grm && ..\\Dependencies\\Goldie\\bin\\goldie-staticlang mdl.cgt --pack=util.mdl.mdlparser";
+		version(linux)
+			return "cd ../src && echo Building mdl grammar... && ../Dependencies/Goldie/bin/goldie-grmc util/mdl/mdl.grm && ../Dependencies/Goldie/bin/goldie-staticlang mdl.cgt --pack=util.mdl.mdlparser";		
+	}
+	return "";
 }
 
 void cleanupMDLParser()
 {
-	writeln("Removing old mdl parser...");
-	version(Windows)
-		system("del /q ..\\src\\util\\mdl\\mdlparser");
-	version(linux)
-		system("rm -rf ../src/util/mdl/mdlparser");
+	if(exists("../src/util/mdl/mdlparser") && !exists("../src/mdl.cgt"))
+	{
+		writeln("Removing old mdl parser...");
+		version(Windows)
+			system("del /q ..\\src\\util\\mdl\\mdlparser");
+		version(linux)
+			system("rm -rf ../src/util/mdl/mdlparser");
+	}
 }
 
 //======================================================================

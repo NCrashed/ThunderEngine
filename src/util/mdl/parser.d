@@ -27,14 +27,31 @@ private
 			float z = to!float(vecTok.getRequired!(MdlToken!"<Real>")(2).toString);
 			return vec3(x,y,z);
 		}
+		else static if(is(T == Vector!(float,2)))	
+		{
+			auto vecTok = tok.getRequired!(MdlToken!"<Vector2>")();
+			float x = to!float(vecTok.getRequired!(MdlToken!"<Real>")(0).toString);
+			float y = to!float(vecTok.getRequired!(MdlToken!"<Real>")(1).toString);
+			return vec2(x,y);
+		}		
 		else static if(is(T == Vector!(int, 2)))
 		{
-			//return vec2i(0,0);
 			auto vecTok = tok.getRequired!(MdlToken!"<Vector2Int>")();
 			int x = to!int(vecTok.getRequired!(MdlToken!"Integer")(0).toString);
 			int y = to!int(vecTok.getRequired!(MdlToken!"Integer")(1).toString);
 			return vec2i(x,y);
 		}
+		else static if(is(T == Vector!(uint, 6)))
+		{
+			auto vecTok = tok.getRequired!(MdlToken!"<Vector6Int>")();
+			int x0 = to!int(vecTok.getRequired!(MdlToken!"Integer")(0).toString);
+			int x1 = to!int(vecTok.getRequired!(MdlToken!"Integer")(1).toString);
+			int x2 = to!int(vecTok.getRequired!(MdlToken!"Integer")(2).toString);
+			int x3 = to!int(vecTok.getRequired!(MdlToken!"Integer")(3).toString);
+			int x4 = to!int(vecTok.getRequired!(MdlToken!"Integer")(4).toString);
+			int x5 = to!int(vecTok.getRequired!(MdlToken!"Integer")(5).toString);			
+			return Vector!(uint, 6)(x0, x1, x2, x3, x4, x5);
+		}		
 		else
 		{
 			return to!T(tok.toString);
@@ -375,6 +392,137 @@ private
 		}
 	}
 
+
+	MdlModel.Geoset getGeoset(MdlToken!"<GeosetSection>" geoTok)
+	{
+		MdlModel.Geoset geoset;
+
+		auto range = traverse(geoTok);
+		foreach(tok; range)
+		{
+			if(tok.name == "<GeosetUnselectable>")
+			{
+				geoset.Unselectable = true;
+				continue;
+			}
+			else if(tok.name == "<GeosetVerticesSection>")
+			{
+				size_t count = getValue!size_t(tok.getToken!"<GeosetVerticesCount>"());
+				geoset.Vertices = new vec3[count];
+				size_t i = 0;
+				foreach(vertTok; traverse(tok))
+				{
+					if(vertTok.name == "<GeosetVertice>")
+					{
+						geoset.Vertices[i++] = getValue!vec3(vertTok);
+					}
+				}
+				range.skip();
+				continue;
+			}
+			else if(tok.name == "<GeosetNormalsSection>")
+			{
+				size_t count = getValue!size_t(tok.getToken!"<GeosetNormalsCount>"());
+				geoset.Normals = new vec3[count];
+				size_t i = 0;
+				foreach(vertTok; traverse(tok))
+				{
+					if(vertTok.name == "<GeosetNormal>")
+					{
+						geoset.Normals[i++] = getValue!vec3(vertTok);
+					}
+				}				
+				range.skip();
+				continue;
+			}
+			else if(tok.name == "<GeosetTVerticesSection>")
+			{
+				size_t count = getValue!size_t(tok.getToken!"<GeosetTVerticesCount>"());
+				geoset.TVertices = new vec2[count];
+				size_t i = 0;
+				foreach(vertTok; traverse(tok))
+				{
+					if(vertTok.name == "<GeosetTVertice>")
+					{
+						geoset.TVertices[i++] = getValue!vec2(vertTok);
+					}
+				}
+				range.skip();
+				continue;
+			}
+			else if(tok.name == "<GeosetVertexGroupSection>")
+			{
+				assert(geoset.Vertices.length != 0, "Geoset vertices group section appears before vertices section!");
+				geoset.Groups = new uint[geoset.Vertices.length];
+				size_t i = 0;
+				foreach(groupTok; traverse(tok))
+				{
+					if(groupTok.name == "<GeosetVertexGroupVal>")
+					{
+						geoset.Groups[i] = getValue!uint(groupTok);
+					}
+				}
+
+				range.skip();
+				continue;
+			}
+			else if(tok.name == "<GeosetFacesSection>")
+			{
+				geoset.Triangles = new Vector!(uint, 6)[0];
+				auto triangRange = traverse(tok);
+				foreach(trianTok; traverse(tok))
+				{
+					if(trianTok.name == "<FacesTrianglesSection>")
+					{
+						triangRange.skip();
+
+						foreach(triangleElemTok; traverse(trianTok))
+						{
+							if(triangleElemTok.name == "<GeosetTriangle>")
+							{
+								geoset.Triangles ~= getValue!(Vector!(uint, 6))(triangleElemTok);
+							}
+						}
+					}
+				}
+				range.skip();
+				continue;
+			}
+			else if(tok.name == "<GeosetGroupsSection>")
+			{
+				range.skip();
+				continue;
+			}		
+			else if(tok.name == "<GeosetAnimSection>")
+			{
+				range.skip();
+				continue;
+			}	
+
+			mixin(generateTokenSwitch!("Geoset", "tok.name", MdlModel.Geoset, "geoset", "tok", 
+				"MinimumExtent",
+				"MaximumExtent",
+				"BoundsRadius",
+				"MaterialID",
+				"SelectionGroup"
+				)());
+		}
+
+		return geoset;
+	}
+
+	void getGeosetSections(MdlToken!"<GeosetSections>" geosetsTok, ref MdlModel model)
+	{
+		model.Geosets = new MdlModel.Geoset[0];
+		foreach(tok; traverse!( isAnyType!(MdlToken!"<GeosetSections>", MdlToken!"<GeosetSection>") )(geosetsTok))
+		{
+			if(tok.name == "<GeosetSection>")
+			{
+				model.Geosets ~= getGeoset(cast(MdlToken!"<GeosetSection>")tok);
+			}
+		}
+	}
+
 	MdlToken!tokname getToken(string tokname)(Token tok)
 	{
 		return tok.getRequired!(MdlToken!tokname)();
@@ -393,6 +541,7 @@ private
 		getGlobalSequencesSection(root.getToken!"<GlobalSequencesSection>"(), model);
 		getTexturesSection(root.getToken!"<TexturesSection>"(), model);
 		getMaterialsSection(root.getToken!"<MaterialsSection>"(), model);
+		getGeosetSections(root.getToken!"<GeosetSections>", model);
 		return model;
 	}
 }

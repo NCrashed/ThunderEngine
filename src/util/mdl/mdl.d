@@ -104,4 +104,21 @@ struct MdlModel
     	Layer[] Layers;
     }
     Material[] Materials;
+
+    struct Geoset
+    {
+        vec3 MinimumExtent;
+        vec3 MaximumExtent;
+        float BoundsRadius = 0.0f;
+        uint MaterialID;
+        uint SelectionGroup;
+        bool Unselectable = false;
+
+        vec3[]              Vertices;
+        vec3[]              Normals;
+        vec2[]              TVertices;
+        uint[]              Groups;
+        Vector!(uint, 6)[]  Triangles;
+    }
+    Geoset[] Geosets;    
 }
