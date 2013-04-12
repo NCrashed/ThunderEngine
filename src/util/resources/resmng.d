@@ -29,6 +29,18 @@ struct ResManagerConfig
 	LoadedResGroup[] resGroups;
 }
 
+/**
+*	Throwed by getResource(ResourceType)(string filename, string groupname)
+*	when it fails to convert getted resource to $(B ResourceType).
+*/
+class ResourceConversionException(ResourceType) : Exception
+{
+	this()
+	{
+		super("Failed to convert resource to expected resource type "~ResourceType.stringof);
+	}
+}
+
 /// Менеджер ресурсов
 /**
 *	Менеджер ресурсов занимается управлением группами ресурсов,
@@ -124,7 +136,7 @@ class ResourceMng
 	*	@par filename Имя файла с ресурсом
 	*	@par resGroup Группа, в которой будет проводиться поиск
 	*/
-	Resource getResource(string filename, string resGroup)
+	Resource getResource()(string filename, string resGroup)
 	{ 
 		string fullname;
 		auto res = getLoadedRes(filename, fullname, resGroup);
@@ -146,6 +158,18 @@ class ResourceMng
 		return ret;
 	}
 	
+	/**
+	*	Same as $(B getResource()(string filename, string resGroup)), but tries
+	*	to convert resource to $(B ResourceType).
+	*/
+	ResourceType getResource(ResourceType)(string filename, string resGroup)
+	{
+		ResourceType ret = cast(ResourceType)getResource(filename, resGroup);
+		if(ret is null)
+			throw new ResourceConversionException!ResourceType();
+		return ret;
+	}
+
 	/// Регистрация фабрики в менджере
 	/**
 	*	@par fact Экземпляр фабрики

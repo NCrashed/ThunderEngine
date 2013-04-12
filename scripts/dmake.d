@@ -596,26 +596,30 @@ private int compileTarget(ref CompilationTarget target)
 		}
 		if(generatedSourceDirs.length > 0)
 		{
+			import std.path;
+			import std.regex;
 			foreach(dir; generatedSourceDirs)
 			{
 				if (dir.empty) continue;
 				SpanMode mode = SpanMode.breadth;
 
-				target.sourcePaths ~= dir;
-				target.addFlags ~= "-I"~dir~" ";
 				auto direntries = dirEntries(dir, mode, true);
+
+				auto flagsArr = array(std.algorithm.splitter(target.addFlags, " "));
+				foreach(size_t i, flag; flagsArr)
+				{
+					if(isValidPath(flag))
+					{
+						flagsArr[i] = replace(buildNormalizedPath(flag), regex(`\\`, "g"), "/");
+					}
+				}
 
 				auto list = filter!`endsWith(a.name,".d")`(direntries);
 				foreach(path; list)
 				{
-					target.addFlags ~= path.name~" "; 
-				}
-
-				direntries = dirEntries(dir, mode, true);
-				auto list2 = filter!`endsWith(a.name,".di")`(direntries);
-				foreach(path; list2)
-				{
-					target.addFlags ~= path.name~" "; 
+					string cmpName = replace(buildNormalizedPath(path.name), regex(`\\`, "g"), "/");
+					if(!canFind(flagsArr, cmpName))
+						target.addFlags ~= path.name~" "; 
 				}
 			}
 		}

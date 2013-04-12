@@ -7,6 +7,7 @@ import client.camera;
 import client.rendersys;
 import client.clworld;
 import client.app;
+import client.model.model;
 
 import util.resources.resmng;
 import util.resources.archivemng;
@@ -47,6 +48,10 @@ class MainWorld : ClientWorld
 
 		auto resmng = ResourceMng.getSingleton();
 		auto scenemng = RenderSystem.getSingleton().sceneManager;
+
+		auto node  = scenemng.rootNode.addChild("TestModel", vec3(0,0,-1));
+		auto model = resmng.getResource!Model("DarkArcher.mdl", "General");
+		node.attachModel(model);
 	}
 
 	/**

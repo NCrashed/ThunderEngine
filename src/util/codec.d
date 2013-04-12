@@ -22,7 +22,7 @@ interface Codec
 {
 public:
 	/// Получение уникального идентификатора кодека
-	@property string type();
+	@property string type() const;
 
 	/// Стандарт потока данных, который обеспечивает кодек
 	/**
@@ -30,7 +30,7 @@ public:
 	*	Возвращаемая строка является именем стандарта, например "model", "image" и т.д.
 	*	Стандарты описываются обычно в файлах с ресурсами, которые и пользуют кодеки.
 	*/
-	@property string standart();
+	@property string standart() const;
 
 	/// Декодирование данных 
 	Stream decode(Stream data);
