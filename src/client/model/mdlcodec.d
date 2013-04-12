@@ -12,10 +12,13 @@ import util.mdl.mdl;
 import util.mdl.parser;
 import util.vector;
 
+
 class MdlCodec : Codec 
 {
 	public
 	{
+		enum DEFAULT_SCALING = 0.01f;
+
 		string type() @property const
 		{
 			return "mdl";
@@ -31,13 +34,39 @@ class MdlCodec : Codec
 			MdlModel mdlModel = parseMdlInput(data);
 			TempModel model;
 
+			void swapYZandScale(vec3[] vecs)
+			{
+				foreach(ref v; vecs)
+				{
+					float temp = v.z;
+					v.z = v.y;
+					v.y = temp;
+					
+					v.x = v.x * DEFAULT_SCALING;
+					v.y = v.y * DEFAULT_SCALING;
+					v.z = v.z * DEFAULT_SCALING;
+				}
+			}
+
+			void swapYZ(vec3[] vecs)
+			{
+				foreach(ref v; vecs)
+				{
+					float temp = v.z;
+					v.z = v.y;
+					v.y = temp;
+				}
+			}
+
 			model.meshes = new TempModel.MeshInfo[mdlModel.Geosets.length];
 			foreach(i, ref geoset; mdlModel.Geosets)
 			{
 				with(model.meshes[i])
 				{
-					vecs = geoset.Vertices.dup;
-					normals = geoset.Normals.dup;
+					vecs = geoset.Vertices.dup; 
+					swapYZandScale(vecs);
+					normals = geoset.Normals.dup; 
+					swapYZ(normals);
 					uvs = geoset.TVertices.dup;
 
 					indexes = new vec3ui[geoset.Triangles.length / 3];

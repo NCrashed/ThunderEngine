@@ -81,9 +81,9 @@ class App
 			running = running && rendersys.shouldContinue();
 
 			// Reading messages from other threads
-			auto gotMessage = receiveTimeout(
+			while(receiveTimeout(
 				dur!"nsecs"(1),
-				&proceedEvent );
+				&proceedEvent )) {};
    		}
 	}
 
