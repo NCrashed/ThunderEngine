@@ -64,7 +64,7 @@ void compileFreeImage(string libPath)
 	version(Windows)
 	{
 		checkProgram("make", "Cannot find MinGW to build FreeImage! You can build manualy with Visual Studio and copy FreeImage.dll to output folder or get MinGW from http://www.mingw.org/wiki/Getting_Started");
-		system("cd "~libPath~` && make -fMakefile.mingw`);
+		system("cd "~libPath~` && mingw32-make -fMakefile.mingw`);
 		system("copy "~libPath~"\\FreeImage.dll "~getCurrentTarget().outDir~"\\FreeImage.dll");
 	}
 }
@@ -84,7 +84,7 @@ void compileGLFW3(string libPath)
 		checkProgram("cmake", "Cannot find CMake to build GLFW3! You can get it from http://www.cmake.org/cmake/resources/software.html");
 		checkProgram("make", "Cannot find MinGW to build GLFW3! You can build manualy with GLFW3 and copy glfw.dll to output folder or get MinGW from http://www.mingw.org/wiki/Getting_Started");
 		system("cd "~libPath~` & cmake -D BUILD_SHARED_LIBS=ON -G "MinGW Makefiles" .\`);
-		system("cd "~libPath~` & make`);
+		system("cd "~libPath~` & mingw32-make`);
 		system("copy "~libPath~`\src\glfw3.dll `~getCurrentTarget().outDir~`\glfw3.dll`);
 	}
 }
