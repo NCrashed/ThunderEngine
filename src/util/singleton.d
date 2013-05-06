@@ -1,4 +1,4 @@
-//          Copyright Gushcha Anton 2012.
+//          Copyright Gushcha Anton 2012-2013.
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
@@ -6,6 +6,8 @@
 /**
 *	@file singleton.d Реализация поточно-безопасного синглетона, некоторые 
 *	уже считают его антипаттерном, но без него сложно делать глобальные менеджеры.
+*	
+*	Thanks to Dave for the TSL storage idea!
 */
 module util.singleton;
 
@@ -22,10 +24,8 @@ module util.singleton;
 */
 mixin template Singleton(T)
 {
-	/// Локальная переменная для потоков
 	private static bool initialized; 
-	/// Расшаренный указатель
-	private static __gshared T mSingleton = null;
+	private __gshared T mSingleton = null;
 
 	/// Создавать нас напрямую нельзя
 	private this(){}
